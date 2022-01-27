@@ -1,24 +1,39 @@
-import React from 'react';
-import logo from './logo.svg';
+import { gql, useQuery } from '@apollo/client';
 import './App.css';
+import { Get_MatchesQuery } from './generated/graphql';
+
+const MATCHES = gql`
+ query get_matches($matchIds: [Int!]!){
+    matches(matchIds: $matchIds){
+    eventId
+    nonLiveBoCount
+  }
+}
+`
 
 function App() {
+  const {loading, error, data} = useQuery<Get_MatchesQuery>(MATCHES, {variables: {matchIds: [1018347896]}, errorPolicy: 'ignore'})
+
+  if(loading){
+    return(
+      <p>loading...</p>
+    )
+  }
+
+  if(error){
+    console.log(error)
+    console.log(data)
+    return(
+      <p>Errors :(</p>
+    )
+  }
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+     <section>
+       {data.matches.map(event => {
+       return <p key={event.eventId}>{event.nonLiveBoCount}</p>
+     })}
+     </section>
     </div>
   );
 }
